@@ -9,6 +9,12 @@ public class Principale {
 		}
 	}
    
+	private static void scambia(int[] v, int i, int j) {
+		int temp=v[i];
+		v[i]=v[j];
+		v[j]=temp;
+	}
+	
 	////////////////////////////////////////////
 	////  Algoritmo INGENUO
 	////////////////////////////////////////////
@@ -23,9 +29,7 @@ public class Principale {
 		for (int i = 0; i < v.length - 1; i++) {
 			for (int j = i + 1; j < v.length; j++) {
 				if (v[i] > v[j]) {
-					c = v[j];
-					v[j] = v[i];
-					v[i] = c;
+					scambia(v,i,j);
 				}
 			}
 		}
@@ -79,9 +83,7 @@ public class Principale {
 			}
 			// Se il minimo non è il primo, scambia.
 			if (pos_min != j) {
-				temp = vet[j];
-				vet[j] = vet[pos_min];
-				vet[pos_min] = temp;
+				scambia(vet,pos_min,j);
 			}
 		} // chiude il for
 	}
@@ -108,9 +110,7 @@ public class Principale {
 			for (int i = 0; i < j; i++) {
 				int temp;
 				if (v[i] > v[i + 1]) {
-					temp = v[i];
-					v[i] = v[i + 1];
-					v[i + 1] = temp;
+					scambia(v,i,i+1);
 					scambio = true;
 				}
 			} // chiude il for
@@ -129,23 +129,39 @@ public class Principale {
 	// ordinamento che ha, nel caso medio, prestazioni migliori tra quelli basati su confronto. 
 	// È stato ideato da Charles Antony Richard Hoare nel 1961.
 	private int partition(int arr[], int low, int high) {
-		int pivot = arr[high];
-		int index = (low - 1); // indice dell'elemento pi� piccolo. -1 all'inizio
+		int pivot = arr[high]; // Pivot l'ultimo elemento
+		int i = low - 1; // indice dell'elemento piu' piccolo. -1 all'inizio
 		for (int j = low; j < high; j++) {
 			// se elemento corrente minore di pivot
-			if (arr[j] < pivot) {
-				index++;
+			if (arr[j] <= pivot) {
+				i++;
 				// scambia arr[index] and arr[j]
-				int temp = arr[index];
-				arr[index] = arr[j];
-				arr[j] = temp;
+                scambia(arr,i,j);
 			}
 		}
 		// scambia arr[index+1] e arr[high] (o pivot)
-		int temp = arr[index + 1];
-		arr[index + 1] = arr[high];
-		arr[high] = temp;
-		return index + 1;
+		scambia(arr,i+1,high);
+		return i + 1;
+	}
+
+	private int hoarepartition(int arr[], int low, int high) {
+		int pivot = arr[low]; // Pivot primo elemento
+		int i = low - 1; // indice dell'elemento piu' piccolo. -1 all'inizio
+		int j = high + 1; // indice dell'elemento piu' grande. 
+		while(true) {
+			do {
+				i++;
+			} while (arr[i] < pivot); //elementi minori a sx
+			
+			do {
+				j--;
+			} while (arr[j] > pivot); //elementi maggiori a dx
+			
+			if (i>=j) { // gli indici si sono scambiati tutti gli elementi sono ok
+				return j;
+			}
+			scambia(arr,i,j);
+		}
 	}
 
 	/*
@@ -165,10 +181,26 @@ public class Principale {
 		}
 	}
 
+	public void hoarequick(int arr[], int low, int high) {
+		if (low < high) {
+			/*
+			 * pi � l'indice di partizionamento, arr[pi] � ora al posto giusto
+			 */
+			int pi = hoarepartition(arr, low, high);
+			// Ordina ricorsivamente gli elementi prima di
+			// partition e dopo partition
+			quick(arr, low, pi - 1);
+			quick(arr, pi + 1, high);
+		}
+	}
 	public void quickSort(int v[]) {
 		quick(v, 0, v.length - 1);
 	}
 
+	public void hoareQuickSort(int v[]) {
+		quick(v, 0, v.length - 1);
+	}
+	
 	////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////
 	
@@ -211,7 +243,7 @@ public class Principale {
 
 	public static void main(String[] args) {
 		Principale p;
-		String[] sort = { "bubbleSort", "ingenuoSort", "selectionSort", "insertionSort", "quickSort" };
+		String[] sort = { "bubbleSort", "ingenuoSort", "selectionSort", "insertionSort", "quickSort", "hoareQuickSort" };
 
 		for (int size = 10; size <= 100000; size *= 10) {
 			p = new Principale(size);
